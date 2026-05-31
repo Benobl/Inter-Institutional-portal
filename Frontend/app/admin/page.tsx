@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import DashboardPage from "./dashboard/page";
 
 export default function Page() {
