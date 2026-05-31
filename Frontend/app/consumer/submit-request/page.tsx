@@ -2,7 +2,7 @@
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Clock, Activity, ArrowRight, Check } from "lucide-react";
@@ -26,7 +26,7 @@ interface Institution {
   logo?: string;
 }
 
-export default function SubmitRequestPage() {
+function SubmitRequestPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedInstitution = searchParams.get("institution");
@@ -779,5 +779,13 @@ export default function SubmitRequestPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function SubmitRequestPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500 font-medium">Loading form...</div>}>
+      <SubmitRequestPageContent />
+    </Suspense>
   );
 }

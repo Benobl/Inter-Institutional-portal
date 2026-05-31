@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 
 import {
@@ -40,7 +40,7 @@ function getIcon(type: NotificationType) {
   }
 }
 
-export default function NotificationsPage() {
+function NotificationsPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
 
@@ -199,5 +199,13 @@ export default function NotificationsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NotificationsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500 font-medium">Loading notifications...</div>}>
+      <NotificationsPageContent />
+    </Suspense>
   );
 }
