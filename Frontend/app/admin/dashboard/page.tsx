@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Bell,
   Building2,
   FileText,
   Users,
@@ -20,6 +19,12 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
+  ArrowRight,
+  TrendingUp,
+  ShieldCheck,
+  AlertCircle,
+  Database,
+  Info,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
@@ -32,7 +37,6 @@ interface Institution {
   approved: number;
 }
 
-// Create a separate component that uses useState and useEffect
 function DashboardContent() {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,13 +108,11 @@ function DashboardContent() {
     (i) => i.status?.toLowerCase() === "suspended"
   ).length;
 
-  // Fix localStorage usage - only access it after component mounts
   const [activeTab, setActiveTab] = useState("institutions");
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // This runs only on client side
     const savedTab = localStorage.getItem("activeTab");
     if (savedTab) {
       setActiveTab(savedTab);
@@ -123,7 +125,6 @@ function DashboardContent() {
         await axios.get("http://localhost:5000/api/admin/institutions", {
           withCredentials: true,
         });
-        // Authenticated, do nothing
       } catch (error) {
         router.push("/login");
       }
@@ -138,48 +139,49 @@ function DashboardContent() {
     }
   }, [activeTab]);
 
-
-
   const stats = [
     {
       title: "Registered Institutions",
       value: institutionStats.total,
-      change: institutionStats.change,
+      change: institutionStats.change || "+2 this week",
       icon: Building2,
-      color: "bg-blue-50 hover:bg-blue-100",
+      color: "bg-blue-500/10 border-blue-500/20",
       iconColor: "text-blue-500",
-      textColor: "text-blue-600",
+      textColor: "text-blue-600 dark:text-blue-400",
+      glowColor: "shadow-blue-500/10",
     },
     {
       title: "Active API Requests",
       value: "156",
       change: "+12 this Month",
       icon: FileText,
-      color: "bg-yellow-50 hover:bg-yellow-100",
-      iconColor: "text-yellow-600",
-      textColor: "text-yellow-700",
+      color: "bg-indigo-500/10 border-indigo-500/20",
+      iconColor: "text-indigo-500",
+      textColor: "text-indigo-600 dark:text-indigo-400",
+      glowColor: "shadow-indigo-500/10",
     },
     {
       title: "Pending Approvals",
       value: pendingCount.toString(),
-      change: `${pendingCount} Pending`,
+      change: `${pendingCount} awaiting action`,
       icon: Clock,
-      color: "bg-green-50 hover:bg-green-100",
-      iconColor: "text-green-500",
-      textColor: "text-green-600",
+      color: "bg-amber-500/10 border-amber-500/20",
+      iconColor: "text-amber-500",
+      textColor: "text-amber-600 dark:text-amber-400",
+      glowColor: "shadow-amber-500/10",
     },
     {
-      title: "Total Users",
+      title: "Total Registered Users",
       value: totalUsers,
-      change: usersChange,
+      change: usersChange || "+5 new signups",
       icon: Users,
-      color: "bg-purple-50 hover:bg-purple-100",
+      color: "bg-purple-500/10 border-purple-500/20",
       iconColor: "text-purple-500",
-      textColor: "text-purple-600",
+      textColor: "text-purple-600 dark:text-purple-400",
+      glowColor: "shadow-purple-500/10",
     },
   ];
 
-  // Add recent activities array
   const recentActivities = [
     {
       type: "registration",
@@ -254,136 +256,234 @@ function DashboardContent() {
   ];
 
   return (
-    <main className="px-6 py-8">
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <Badge
-            variant="secondary"
-            className="bg-red-100 text-red-800 hover:bg-red-200"
-          >
-            Administrator
-          </Badge>
+    <main className="px-8 py-8 space-y-8 bg-gray-50/50 min-h-screen">
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+              Admin Overview
+            </h1>
+            <Badge className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md px-2.5 py-0.5 text-xs shadow-sm">
+              Administrator Access
+            </Badge>
+          </div>
+          <p className="text-sm text-gray-500">
+            Control, audit, and analyze the Inter-Institutional Data Exchange ecosystem.
+          </p>
         </div>
-        <p className="text-gray-600">
-          Monitor and manage system operations, user activities, and
-          institutional data
-        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => router.push("/admin/institutions")}
+            variant="outline"
+            className="rounded-lg shadow-sm font-medium hover:bg-gray-100"
+          >
+            Manage Institutions
+            <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
-
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map((stat, index) => (
           <Card
             key={index}
-            className="bg-white border-0 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+            className={`bg-white border border-gray-200/80 shadow-sm rounded-2xl hover:shadow-md hover:border-gray-300 transition-all duration-300 ${stat.glowColor}`}
           >
-            <CardContent className="p-4">
-              <div className={`${stat.color} rounded-lg p-4 relative`}>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      {stat.title}
-                    </p>
-                  </div>
-                  <div
-                    className={`p-2 rounded-lg ${stat.color.split(" ")[0]} ml-2`}
-                  >
-                    <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
-                  </div>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className={`p-3 rounded-xl ${stat.color} border`}>
+                  <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                  <p className={`text-sm ${stat.textColor}`}>{stat.change}</p>
+                <Badge
+                  variant="secondary"
+                  className="bg-gray-100 text-gray-700 rounded-md font-medium text-xs px-2 py-0.5 flex items-center gap-1 border border-gray-200/50"
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  Live
+                </Badge>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  {stat.title}
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                    {stat.value}
+                  </p>
                 </div>
+                <p className={`text-xs font-medium ${stat.textColor}`}>
+                  {stat.change}
+                </p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
+      {/* Main Tabs Layout */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
-          <TabsTrigger value="institutions" className="flex items-center space-x-2">
-            <Building2 className="w-4 h-4" />
-            <span>Institutions</span>
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center space-x-2">
-            <Activity className="w-4 h-4" />
-            <span>System Activity</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="border-b border-gray-200 pb-2">
+          <TabsList className="bg-gray-100/80 p-1 rounded-xl border border-gray-200/60 inline-flex">
+            <TabsTrigger
+              value="institutions"
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+            >
+              <Building2 className="w-4 h-4" />
+              <span>Institutions</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="activity"
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+            >
+              <Activity className="w-4 h-4" />
+              <span>System Activity</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="institutions" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Building2 className="w-5 h-5" />
-                <span>Institution Management</span>
-              </CardTitle>
-              <CardDescription>
-                Manage and monitor registered institutions in the system
-              </CardDescription>
+        {/* Institutions Tab */}
+        <TabsContent value="institutions" className="outline-none space-y-6">
+          <Card className="border border-gray-200/80 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="bg-white border-b border-gray-100 p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-gray-500" />
+                    Institution Directory
+                  </CardTitle>
+                  <CardDescription className="text-gray-500 text-sm">
+                    Overview and fast verification actions for registered institutions.
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-8 h-8 text-blue-600" />
-                    <div>
-                      <p className="font-semibold text-blue-900">Active Institutions</p>
-                      <p className="text-2xl font-bold text-blue-700">{activeCount}</p>
-                    </div>
+            <CardContent className="p-6 space-y-6 bg-white">
+              {/* Institution Sub-Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="p-5 bg-emerald-500/[0.04] rounded-2xl border border-emerald-500/10 flex items-center gap-4">
+                  <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-600 border border-emerald-500/20">
+                    <CheckCircle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">
+                      Active
+                    </p>
+                    <p className="text-2xl font-bold text-emerald-950">
+                      {activeCount}
+                    </p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
-                  <div className="flex items-center space-x-3">
-                    <Clock className="w-8 h-8 text-amber-600" />
-                    <div>
-                      <p className="font-semibold text-amber-900">Pending Approval</p>
-                      <p className="text-2xl font-bold text-amber-700">{pendingCount}</p>
-                    </div>
+                <div className="p-5 bg-amber-500/[0.04] rounded-2xl border border-amber-500/10 flex items-center gap-4">
+                  <div className="p-3 bg-amber-500/10 rounded-xl text-amber-600 border border-amber-500/20">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                      Awaiting Action
+                    </p>
+                    <p className="text-2xl font-bold text-amber-950">
+                      {pendingCount}
+                    </p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                  <div className="flex items-center space-x-3">
-                    <AlertTriangle className="w-8 h-8 text-red-600" />
-                    <div>
-                      <p className="font-semibold text-red-900">Suspended Institutions</p>
-                      <p className="text-2xl font-bold text-red-700">{suspendedCount}</p>
-                    </div>
+                <div className="p-5 bg-rose-500/[0.04] rounded-2xl border border-rose-500/10 flex items-center gap-4">
+                  <div className="p-3 bg-rose-500/10 rounded-xl text-rose-600 border border-rose-500/20">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-rose-800 uppercase tracking-wider">
+                      Suspended
+                    </p>
+                    <p className="text-2xl font-bold text-rose-950">
+                      {suspendedCount}
+                    </p>
                   </div>
                 </div>
               </div>
 
-
-
-              {/* Example institutions list - replace or expand as needed */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
+              {/* Institutions List Table */}
+              <div className="overflow-x-auto rounded-xl border border-gray-150">
+                <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr>
-                      <th className="py-2 text-sm text-gray-600">Name</th>
-                      <th className="py-2 text-sm text-gray-600">Status</th>
-                      <th className="py-2 text-sm text-gray-600">Approved</th>
+                    <tr className="bg-gray-50/75 border-b border-gray-100">
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-gray-500">
+                        Institution ID
+                      </th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-gray-500">
+                        Name
+                      </th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-gray-500">
+                        Status
+                      </th>
+                      <th className="px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-gray-500">
+                        Approved Status
+                      </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {institutions.length === 0 ? (
                       <tr>
-                        <td colSpan={3} className="py-4 text-sm text-gray-500">
-                          No institutions available.
+                        <td
+                          colSpan={4}
+                          className="px-6 py-10 text-center text-sm text-gray-500"
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <Database className="w-8 h-8 text-gray-300" />
+                            <p>No registered institutions found.</p>
+                          </div>
                         </td>
                       </tr>
                     ) : (
                       institutions.map((inst) => (
-                        <tr key={inst.id} className="border-t">
-                          <td className="py-3 text-sm text-gray-800">{inst.name}</td>
-                          <td className="py-3 text-sm text-gray-600">{inst.status}</td>
-                          <td className="py-3 text-sm text-gray-600">{inst.approved}</td>
+                        <tr
+                          key={inst.id}
+                          className="hover:bg-gray-50/50 transition-colors"
+                        >
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-700">
+                            #{inst.id}
+                          </td>
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                            {inst.name}
+                          </td>
+                          <td className="px-6 py-4 text-sm">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                inst.status?.toLowerCase() === "active"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : inst.status?.toLowerCase() === "pending"
+                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                    : "bg-rose-50 text-rose-700 border border-rose-200"
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  inst.status?.toLowerCase() === "active"
+                                    ? "bg-emerald-500"
+                                    : inst.status?.toLowerCase() === "pending"
+                                      ? "bg-amber-500"
+                                      : "bg-rose-500"
+                                }`}
+                              />
+                              {inst.status || "Unknown"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {inst.approved === 1 ? (
+                              <Badge className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold border-emerald-300 rounded-md">
+                                <ShieldCheck className="w-3.5 h-3.5 mr-1" />
+                                Approved
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-amber-100 hover:bg-amber-200 text-amber-800 font-semibold border-amber-300 rounded-md">
+                                <AlertCircle className="w-3.5 h-3.5 mr-1" />
+                                Unverified
+                              </Badge>
+                            )}
+                          </td>
                         </tr>
                       ))
                     )}
@@ -394,63 +494,137 @@ function DashboardContent() {
           </Card>
         </TabsContent>
 
-        {/* Activity tab (moved activity details here) */}
-        <TabsContent value="activity" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="w-5 h-5" />
-                <span>System Activity</span>
+        {/* Activity Tab */}
+        <TabsContent value="activity" className="outline-none space-y-6">
+          <Card className="border border-gray-200/80 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="bg-white border-b border-gray-100 p-6">
+              <CardTitle className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-gray-500" />
+                Live Security & Audit Logs
               </CardTitle>
-              <CardDescription>Recent system activities and request logs</CardDescription>
+              <CardDescription className="text-gray-500 text-sm">
+                Trace real-time network transfers, registrations, failures, and access audits.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="col-span-1 lg:col-span-1">
-                  <div className="space-y-2">
+            <CardContent className="p-6 bg-white">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Activity List Panel */}
+                <div className="lg:col-span-1 space-y-3">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    Recent Events
+                  </p>
+                  <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
                     {recentActivities.map((act, idx) => (
                       <button
                         key={idx}
                         onClick={() => setSelectedActivity(act)}
-                        className={`w-full text-left p-3 rounded-lg border ${selectedActivity === act ? "border-blue-300 bg-blue-50" : "border-gray-100 hover:bg-gray-50"}`}
+                        className={`w-full text-left p-4 rounded-xl border transition-all ${
+                          selectedActivity === act
+                            ? "border-blue-500 bg-blue-500/[0.03] shadow-sm"
+                            : "border-gray-200 hover:bg-gray-50/80"
+                        }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">{act.title}</p>
-                            <p className="text-xs text-gray-500">{act.time}</p>
-                          </div>
-                          <div>
-                            <Badge className="ml-2">{act.type}</Badge>
-                          </div>
+                        <div className="flex items-start justify-between gap-2 mb-1.5">
+                          <p className="text-sm font-bold text-gray-900 line-clamp-1">
+                            {act.title}
+                          </p>
+                          <Badge
+                            className={`rounded-md font-semibold text-[10px] uppercase tracking-wider px-1.5 py-0.5 flex-shrink-0 ${
+                              act.type === "registration"
+                                ? "bg-purple-100 text-purple-800 border-purple-200"
+                                : act.type === "request"
+                                  ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                                  : act.type === "failure"
+                                    ? "bg-rose-100 text-rose-800 border-rose-200"
+                                    : "bg-blue-100 text-blue-800 border-blue-200"
+                            }`}
+                          >
+                            {act.type}
+                          </Badge>
                         </div>
+                        <p className="text-xs text-gray-400 font-medium">
+                          {act.time}
+                        </p>
                       </button>
                     ))}
                   </div>
                 </div>
 
-
-
-                <div className="col-span-1 lg:col-span-2">
+                {/* Details Viewer Panel */}
+                <div className="lg:col-span-2">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                    Audit Detail View
+                  </p>
                   {selectedActivity && selectedActivity.details ? (
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <h3 className="font-semibold text-gray-900 mb-2">{selectedActivity.title}</h3>
-                      <div className="space-y-2">
-                        {Object.entries(selectedActivity.details).map(([key, value]) => (
-                          <div key={key} className="flex justify-between items-start">
-                            <span className="text-sm font-medium text-gray-600 capitalize">
-                              {key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase())}:
-                            </span>
-                            <span className="text-sm text-gray-900 text-right max-w-xs">
-                              {Array.isArray(value) ? value.join(", ") : String(value)}
-                            </span>
-                          </div>
-                        ))}
+                    <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200 space-y-5">
+                      <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
+                        <div className="p-2.5 bg-white rounded-xl shadow-sm border border-gray-200 text-gray-600">
+                          <Info className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-base">
+                            {selectedActivity.title}
+                          </h3>
+                          <p className="text-xs text-gray-400 font-medium">
+                            Status: <span className="font-semibold text-gray-600">{selectedActivity.details.status || "Completed"}</span>
+                          </p>
+                        </div>
                       </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(selectedActivity.details).map(
+                          ([key, value]) => {
+                            if (key === "status" || key === "submittedDocuments") return null;
+                            return (
+                              <div
+                                key={key}
+                                className="bg-white p-3.5 rounded-xl border border-gray-200/60 shadow-2xs"
+                              >
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                                  {key
+                                    .replace(/([A-Z])/g, " $1")
+                                    .replace(/^./, (s) => s.toUpperCase())}
+                                </span>
+                                <span className="text-sm font-semibold text-gray-800 break-words">
+                                  {String(value)}
+                                </span>
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
+
+                      {/* Render Documents if registration type */}
+                      {selectedActivity.details.submittedDocuments && (
+                        <div className="bg-white p-4 rounded-xl border border-gray-200/60 space-y-2">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                            Submitted Documents
+                          </span>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {selectedActivity.details.submittedDocuments.map(
+                              (doc: string, dIdx: number) => (
+                                <Badge
+                                  key={dIdx}
+                                  variant="outline"
+                                  className="bg-gray-50 border-gray-200 text-gray-700 text-xs font-semibold py-1 px-2.5 rounded-md"
+                                >
+                                  {doc}
+                                </Badge>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="bg-gray-50 p-8 rounded-lg text-center">
-                      <Activity className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-500 text-sm">Click on any activity to view detailed information</p>
+                    <div className="bg-gray-50 p-12 rounded-2xl text-center border border-dashed border-gray-300/80 flex flex-col items-center justify-center min-h-[300px]">
+                      <Activity className="w-12 h-12 text-gray-450 mb-3 stroke-[1.5]" />
+                      <p className="font-bold text-gray-700 text-base mb-1">
+                        No Event Selected
+                      </p>
+                      <p className="text-gray-400 text-xs max-w-xs leading-normal">
+                        Select an event from the left panel to review compliance, focal points, and security payloads.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -463,7 +637,6 @@ function DashboardContent() {
   );
 }
 
-// Main component with Suspense boundary
 export default function DashboardPage() {
   return (
     <Suspense

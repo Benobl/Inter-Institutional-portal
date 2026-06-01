@@ -7,9 +7,12 @@ export function middleware(request: NextRequest) {
   // Get the cookie value properly
   const token = request.cookies.get("token")?.value;
 
-  // Protect /admin and /welcome routes if no token
+  // Protect restricted routes if no token
   if (
-    (pathname.startsWith("/admin") || pathname.startsWith("/welcome")) &&
+    (pathname.startsWith("/admin") ||
+      pathname.startsWith("/welcome") ||
+      pathname.startsWith("/consumer") ||
+      pathname.startsWith("/provider")) &&
     !token
   ) {
     // Redirect to /login
@@ -23,5 +26,10 @@ export function middleware(request: NextRequest) {
 
 // Specify which routes this middleware applies to
 export const config = {
-  matcher: ["/admin/:path*", "/welcome/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/welcome/:path*",
+    "/consumer/:path*",
+    "/provider/:path*",
+  ],
 };

@@ -121,7 +121,24 @@ export default function ConsumerDashboard() {
 
         console.log("Institutions fetched:", data);
 
-        setInstitutions(data);
+        const parsedData = Array.isArray(data) ? data.map((inst: any) => {
+          let parsedServices: string[] = [];
+          try {
+            if (typeof inst.services === "string") {
+              parsedServices = JSON.parse(inst.services);
+            } else if (Array.isArray(inst.services)) {
+              parsedServices = inst.services;
+            }
+          } catch (e) {
+            console.error("Failed to parse services:", inst.services);
+          }
+          return {
+            ...inst,
+            services: parsedServices,
+          };
+        }) : [];
+
+        setInstitutions(parsedData);
 
         const activeInstitutionsCount = data.filter(
           (inst) => inst.status?.toLowerCase() === "active"

@@ -86,10 +86,23 @@ export default function InstitutionsContent() {
         const data = await response.json();
 
         const mappedInstitutions = Array.isArray(data.institutions)
-          ? data.institutions.map((inst: any) => ({
-              ...inst,
-              contactPerson: inst.contact_person || "",
-            }))
+          ? data.institutions.map((inst: any) => {
+              let parsedServices = [];
+              try {
+                if (typeof inst.services === "string") {
+                  parsedServices = JSON.parse(inst.services);
+                } else if (Array.isArray(inst.services)) {
+                  parsedServices = inst.services;
+                }
+              } catch (e) {
+                console.error("Failed to parse services:", inst.services);
+              }
+              return {
+                ...inst,
+                contactPerson: inst.contact_person || "",
+                services: parsedServices,
+              };
+            })
           : [];
 
         setInstitutions(mappedInstitutions);

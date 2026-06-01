@@ -225,35 +225,35 @@ cp .env.example .env
 
 #### Database Setup
 
-```sql
--- Create database
-CREATE DATABASE inter_institutional_portal;
-USE inter_institutional_portal;
+Ensure your local MySQL server is running, and execute the database setup commands. You can load the SQL schema using MySQL CLI or your GUI:
+
+```bash
+# 1. Log in to MySQL and set up the database
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS data_exchanger_portal;"
+
+# 2. Import the initial database schema (run from the project root)
+mysql -u root -p data_exchanger_portal < Backend/setup-db.sql
 ```
 
-Then run your schema migrations and seed the demo accounts:
+#### Seeding Demo Accounts
 
-```sql
--- Users table (simplified)
-CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  role ENUM('admin', 'consumer', 'provider') NOT NULL,
-  institution_id INT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+To easily seed pre-configured demo users and institutions, run the dedicated seed script.
 
--- Seed demo accounts (passwords are bcrypt-hashed)
--- Admin: admin@dataexchange.gov.et / Admin@1234
--- Consumer: consumer@dataexchange.gov.et / Consumer@1234
--- Provider: provider@dataexchange.gov.et / Provider@1234
+> [!IMPORTANT]
+> Always navigate to the **`Backend`** folder before executing the seeding script to ensure all NPM dependencies (`dotenv`, `mysql2`, `bcryptjs`) are correctly resolved.
+
+```bash
+# Navigate to the Backend folder
+cd Backend
+
+# Run the seeding script
+node seed-demo.js
 ```
 
 Start the backend:
 
 ```bash
-npm run dev       # Development (with nodemon)
+npm run dev       # Development (with nodemon auto-restart)
 # OR
 npm start         # Production
 ```

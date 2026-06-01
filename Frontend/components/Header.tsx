@@ -59,8 +59,10 @@ export default function Header() {
   // Fetch notifications from backend for specific request
   const fetchAllNotifications = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/notifications/unread`);
-      if (!res.ok) throw new Error("Failed to fetch notifications");
+      const res = await fetch(`http://localhost:5000/api/notifications/unread`, {
+        credentials: "include",
+      });
+      if (!res.ok) return; // silently fail if not authenticated yet
 
       const data = await res.json();
 
@@ -70,12 +72,13 @@ export default function Header() {
         message: n.message,
         read: n.isRead === 1,
         time: new Date(n.createdAt).toLocaleString(),
+        timestamp: new Date(n.createdAt).toISOString(),
         type: "info",
       }));
 
       setNotifications(formatted);
     } catch (error) {
-      console.error("Error loading notifications:", error);
+      // silently ignore — user may not be logged in yet
     }
   };
 
@@ -95,6 +98,7 @@ export default function Header() {
         message: n.message,
         read: n.isRead === 1,
         time: new Date(n.createdAt).toLocaleString(),
+        timestamp: new Date(n.createdAt).toISOString(),
         type: "info",
       }));
 
@@ -129,7 +133,8 @@ export default function Header() {
         message: newNotification.message,
         read: newNotification.isRead === 1,
         time: new Date(newNotification.createdAt).toLocaleString(),
-        type: "info",
+        timestamp: new Date(newNotification.createdAt).toISOString(),
+        type: "info" as const,
       };
 
       setNotifications((prev) => [formattedNotification, ...prev]);
@@ -148,7 +153,7 @@ export default function Header() {
   }, [requestId]);
 
   // Mark single notification as read/unread
-  const handleMarkAsRead = async (notificationId: number) => {
+  const handleMarkAsRead = async (notificationId: number, isRead = true) => {
     try {
       const res = await fetch(
         `http://localhost:5000/api/notifications/${notificationId}/read`,

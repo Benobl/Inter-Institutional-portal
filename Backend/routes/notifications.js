@@ -7,6 +7,7 @@ const router = express.Router({ mergeParams: true });
 
 // Request notifications
 router.get("/", authMiddleware, requestController.getNotifications);
+router.get("/unread", authMiddleware, notificationsController.getUnreadNotifications);
 
 // Notifications actions
 router.patch("/:notificationId/read", notificationsController.markAsRead);
