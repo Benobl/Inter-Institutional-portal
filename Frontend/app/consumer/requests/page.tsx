@@ -77,7 +77,23 @@ export default function MyRequestsPage() {
         if (!res.ok) throw new Error("Failed to load requests");
 
         const data: APIRequest[] = await res.json();
-        setRequests(data); // this will now contain only the current user's requests
+        const parsed = Array.isArray(data) ? data.map((req: any) => {
+          let parsedServices: string[] = [];
+          try {
+            if (typeof req.services === "string") {
+              parsedServices = JSON.parse(req.services);
+            } else if (Array.isArray(req.services)) {
+              parsedServices = req.services;
+            }
+          } catch (e) {
+            console.error("Failed to parse services:", req.services);
+          }
+          return {
+            ...req,
+            services: parsedServices,
+          };
+        }) : [];
+        setRequests(parsed); // this will now contain only the current user's requests
       } catch (error) {
         console.error("Error fetching requests:", error);
       } finally {

@@ -43,10 +43,10 @@ export default function VegasWebLandingPage() {
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-[#6da7cb] to-[#a0c7e0] rounded-xl text-white text-lg font-bold">
-              DE
+              M
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-[#6da7cb] to-[#a0c7e0] bg-clip-text text-transparent">
-              DataExchange
+              Mesob
             </h1>
           </div>
         </div>

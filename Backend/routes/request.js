@@ -3,10 +3,16 @@ const router = express.Router();
 
 const requestController = require("../controllers/requestController");
 const providerController = require("../controllers/providerController");
+const notificationsController = require("../controllers/notificationsController");
 const authMiddleware = require("../middlewares/auth");
 
 router.post("/", authMiddleware, requestController.submitRequest);
 router.get("/", authMiddleware, providerController.getRequestsForInstitution); // only this
+router.get(
+  "/:id/notifications",
+  authMiddleware,
+  notificationsController.getNotificationsByRequestId
+);
 // router.get(
 //   "/notifications",
 //   authMiddleware,

@@ -349,7 +349,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
           {!isSidebarCollapsed && (
             <div className="overflow-hidden">
               <span className="font-bold text-lg text-gray-900 tracking-tight block">
-                DataExchange
+                Mesob
               </span>
               <span className="text-[10px] font-semibold text-blue-600 uppercase tracking-widest leading-none block mt-0.5">
                 {roleDisplayName} Portal
@@ -443,9 +443,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
             </Button>
             <div className="lg:hidden flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm font-bold text-sm">
-                DE
+                M
               </div>
-              <span className="font-bold text-lg text-gray-900">DataExchange</span>
+              <span className="font-bold text-lg text-gray-900">Mesob</span>
             </div>
             {/* Breadcrumb Info or Institutional details */}
             <div className="hidden lg:flex items-center gap-2">
@@ -457,7 +457,7 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               ) : (
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Shield className="w-4 h-4 text-gray-400" />
-                  <span className="font-semibold text-gray-700">Federal Data Exchange System</span>
+                  <span className="font-semibold text-gray-700">Mesob Data Exchange</span>
                 </div>
               )}
             </div>
@@ -561,9 +561,9 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
               <div className="h-16 flex items-center justify-between px-5 border-b border-gray-100">
                 <Link href="/" className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm font-bold text-sm">
-                    DE
+                    M
                   </div>
-                  <span className="font-bold text-lg text-gray-900">DataExchange</span>
+                  <span className="font-bold text-lg text-gray-900">Mesob</span>
                 </Link>
                 <Button
                   variant="ghost"

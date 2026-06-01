@@ -31,7 +31,7 @@ export default function AboutPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                DataExchange
+                Mesob
               </h1>
               <p className="text-xs text-gray-500">Portal</p>
             </div>
@@ -50,7 +50,7 @@ export default function AboutPage() {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <h2 className="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              About DataExchange Portal
+              About Mesob Data Exchange Portal
             </h2>
             <p className="text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Empowering institutions worldwide with secure, efficient, and
@@ -99,7 +99,7 @@ export default function AboutPage() {
           {/* Key Features */}
           <div className="mb-16">
             <h3 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Why Choose DataExchange Portal?
+              Why Choose Mesob Data Exchange Portal?
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="text-center group hover:shadow-xl transition-all duration-300 border-0 shadow-md">
@@ -159,7 +159,7 @@ export default function AboutPage() {
           <Card className="mb-16 shadow-2xl border-0 bg-gradient-to-r from-blue-50 to-indigo-50">
             <CardHeader className="text-center">
               <CardTitle className="text-3xl font-bold mb-4">
-                How DataExchange Portal Works
+                How Mesob Data Exchange Works
               </CardTitle>
               <CardDescription className="text-lg">
                 A streamlined process designed for efficiency and security

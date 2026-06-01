@@ -24,7 +24,10 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: (origin, callback) => {
+      // Dynamically allow requesting origin in development to support localhost, 127.0.0.1, or local network IPs
+      callback(null, true);
+    },
     credentials: true,
   })
 );

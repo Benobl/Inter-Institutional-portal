@@ -52,18 +52,32 @@ function NotificationsPageContent() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    if (requestId) fetchNotifications();
+    fetchNotifications();
   }, [requestId]);
 
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(
-        `http://localhost:5000/api/requests/${requestId}/notifications`
-      );
+      const url = requestId
+        ? `http://localhost:5000/api/requests/${requestId}/notifications`
+        : `http://localhost:5000/api/notifications`;
+      const res = await fetch(url, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch notifications");
       const data = await res.json();
-      setNotifications(data);
+      
+      const normalizedData = (Array.isArray(data) ? data : data.data || []).map((n: any) => ({
+        id: n.id,
+        title: n.title || "Notification",
+        message: n.message || "",
+        details: n.details || "",
+        type: n.type || "info",
+        time: n.createdAt || n.created_at || n.timestamp || "",
+        read: n.isRead === 1 || n.isRead === true || n.is_read === 1 || n.is_read === true || false,
+      }));
+
+      setNotifications(normalizedData);
     } catch (err) {
       console.error("Error:", err);
     } finally {
@@ -73,7 +87,8 @@ function NotificationsPageContent() {
 
   const markAsRead = async (id: number) => {
     await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
-      method: "POST",
+      method: "PATCH",
+      credentials: "include",
     });
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
@@ -82,7 +97,8 @@ function NotificationsPageContent() {
 
   const markAsUnread = async (id: number) => {
     await fetch(`http://localhost:5000/api/notifications/${id}/unread`, {
-      method: "POST",
+      method: "PATCH",
+      credentials: "include",
     });
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: false } : n))

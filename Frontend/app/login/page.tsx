@@ -80,7 +80,7 @@ export default function LoginPage() {
           Mesob
         </div>
         <h1 className="text-xl sm:text-2xl font-semibold text-white drop-shadow-md">
-          Data Exchange Portal
+          Mesob Data Exchange Portal
         </h1>
       </div>
 

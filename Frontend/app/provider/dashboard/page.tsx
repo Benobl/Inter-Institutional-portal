@@ -35,8 +35,8 @@ type IncomingRequest = {
   priority: string;
   status: string;
   description: string;
-  requestedAttributes: string[];
-  purpose: string;
+  requestedAttributes?: string[];
+  purpose?: string;
   institutionName: string;
 };
 
@@ -387,7 +387,7 @@ export default function ProviderDashboard() {
                               Purpose:
                             </h5>
                             <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                              {request.purpose}
+                              {request.purpose || request.description || "No purpose provided"}
                             </p>
                           </div>
 

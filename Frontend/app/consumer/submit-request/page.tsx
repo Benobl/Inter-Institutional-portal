@@ -60,7 +60,25 @@ function SubmitRequestPageContent() {
         if (!res.ok) throw new Error("Fetch failed");
         return res.json();
       })
-      .then((data) => setInstitutions(data))
+      .then((data) => {
+        const parsed = Array.isArray(data) ? data.map((inst: any) => {
+          let parsedServices: string[] = [];
+          try {
+            if (typeof inst.services === "string") {
+              parsedServices = JSON.parse(inst.services);
+            } else if (Array.isArray(inst.services)) {
+              parsedServices = inst.services;
+            }
+          } catch (e) {
+            console.error("Failed to parse services:", inst.services);
+          }
+          return {
+            ...inst,
+            services: parsedServices,
+          };
+        }) : [];
+        setInstitutions(parsed);
+      })
       .catch((err) => console.error("Fetch issue:", err))
       .finally(() => setLoading(false));
   }, []);

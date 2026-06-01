@@ -4,8 +4,8 @@ import AdminSidebar from "@/components/AdminSidebar";
 import { NotificationsProvider } from "@/components/NotificationsContext";
 
 export const metadata: Metadata = {
-  title: "Admin — Data Exchange Portal",
-  description: "Admin dashboard for Inter-Institutional Data Exchange Portal",
+  title: "Admin — Mesob Data Exchange Portal",
+  description: "Admin dashboard for Mesob Inter-Institutional Data Exchange Portal",
 };
 
 export default function AdminLayout({
@@ -25,7 +25,7 @@ export default function AdminLayout({
           <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
             <div>
               <h2 className="text-lg font-semibold text-gray-800">
-                Data Exchange Portal
+                Mesob Data Exchange Portal
               </h2>
               <p className="text-xs text-gray-500">Administrator Console</p>
             </div>

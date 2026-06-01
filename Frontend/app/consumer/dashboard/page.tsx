@@ -31,6 +31,7 @@ import {
   Activity,
   Building2,
   Search,
+  Bell,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import Link from "next/link";
@@ -160,132 +161,101 @@ export default function ConsumerDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   // const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const [recentRequests, setRecentRequests] = useState<APIRequest[]>([
-    {
-      id: 1,
-      title: "Student Enrollment Data API",
-      provider: "Ministry of Education",
-      providerId: "edu-001",
-      status: "in_progress",
-      submittedDate: "2024-01-16",
-      priority: "high",
-      description:
-        "Request for real-time student enrollment data across universities",
-      progress: 75,
-      estimatedCompletion: "2024-01-20",
-    },
-    {
-      id: 2,
-      title: "Research Publication Metrics",
-      provider: "Academic Publishers Consortium",
-      providerId: "publishers-001",
-      status: "approved",
-      submittedDate: "2024-01-15",
-      priority: "medium",
-      description: "Access to publication metrics and citation data",
-      apiEndpoint: "https://api.publishers.org/v3/metrics",
-      documentation: "https://docs.publishers.org/api",
-    },
-    {
-      id: 3,
-      title: "Financial Aid Information",
-      provider: "Department of Financial Services",
-      providerId: "finance-001",
-      status: "rejected",
-      submittedDate: "2024-01-14",
-      priority: "low",
-      description: "Student financial aid status and history",
-      rejectionReason: "Insufficient security clearance documentation provided",
-    },
-    {
-      id: 4,
-      title: "Healthcare Provider Directory",
-      provider: "Ministry of Health",
-      providerId: "health-001",
-      status: "approved",
-      submittedDate: "2024-01-12",
-      priority: "high",
-      description:
-        "Comprehensive healthcare provider directory with specializations",
-      apiEndpoint: "https://api.health.gov/v2/providers",
-      documentation: "https://docs.health.gov/api",
-    },
-    {
-      id: 5,
-      title: "Transportation Route Data",
-      provider: "Transport Authority",
-      providerId: "transport-001",
-      status: "pending",
-      submittedDate: "2024-01-10",
-      priority: "medium",
-      description: "Public transportation routes and schedules",
-    },
-  ]);
-
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      message: "Your request 'Student Enrollment Data API' is 75% complete",
-      timestamp: "2 hours ago",
-      type: "info",
-      isRead: false,
-    },
-    {
-      id: 2,
-      message: "API documentation available for 'Research Publication Metrics'",
-      timestamp: "1 day ago",
-      type: "success",
-      isRead: false,
-    },
-    {
-      id: 3,
-      message:
-        "Request 'Financial Aid Information' requires additional documentation",
-      timestamp: "2 days ago",
-      type: "warning",
-      isRead: true,
-    },
-    {
-      id: 4,
-      message: "New API endpoint available for Healthcare Provider Directory",
-      timestamp: "3 days ago",
-      type: "success",
-      isRead: true,
-    },
-  ]);
+  const [recentRequests, setRecentRequests] = useState<APIRequest[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     const loadRequests = async () => {
       try {
         const res = await fetch(
           "http://localhost:5000/api/requests/my-requests",
-          {
-            credentials: "include",
-          }
+          { credentials: "include" }
         );
 
         if (!res.ok) throw new Error("Failed to load requests");
 
-        const data: APIRequest[] = await res.json();
-        console.log("Requests fetched:", data); // check the response
+        const raw = await res.json();
+        const data: APIRequest[] = Array.isArray(raw)
+          ? raw.map((r: any) => ({
+              ...r,
+              // Normalize status casing coming from the DB
+              status: r.status ?? "pending",
+              provider: r.institutionName ?? r.provider ?? "Unknown",
+              providerId: String(r.institutionId ?? r.providerId ?? ""),
+              submittedDate: r.createdAt ?? r.date ?? "",
+              priority: r.priority ?? "medium",
+            }))
+          : [];
+
+        setRecentRequests(data);
+
+        const pending = data.filter(
+          (r) => r.status?.toLowerCase() === "submitted" || r.status?.toLowerCase() === "pending"
+        ).length;
+        const approved = data.filter(
+          (r) => r.status?.toLowerCase() === "approved"
+        ).length;
+        const rejected = data.filter(
+          (r) => r.status?.toLowerCase() === "rejected"
+        ).length;
+
         setStats((prev) => ({
           ...prev,
-          totalRequests: Array.isArray(data) ? data.length : 0,
+          totalRequests: data.length,
+          pendingRequests: pending,
+          approvedRequests: approved,
+          rejectedRequests: rejected,
+          activeAPIs: approved,
         }));
       } catch (err) {
         console.error("Failed to fetch requests:", err);
       }
     };
 
+    const loadNotifications = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/notifications",
+          { credentials: "include" }
+        );
+
+        if (!res.ok) throw new Error("Failed to load notifications");
+
+        const raw = await res.json();
+        const data: Notification[] = Array.isArray(raw)
+          ? raw.map((n: any) => ({
+              id: n.id,
+              message: n.message,
+              timestamp: n.timestamp ?? n.createdAt ?? "",
+              type: n.type ?? "info",
+              isRead: !!n.read,
+            }))
+          : [];
+
+        setNotifications(data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+
     loadRequests();
+    loadNotifications();
   }, []);
 
-  const markNotificationAsRead = (id: number) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === id ? { ...notif, isRead: true } : notif
-      )
-    );
+  const markNotificationAsRead = async (id: number) => {
+    try {
+      await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === id ? { ...notif, isRead: true } : notif
+        )
+      );
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -294,12 +264,15 @@ export default function ConsumerDashboard() {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "pending":
+      case "submitted":
         return <Clock className="h-4 w-4" />;
       case "in_progress":
+      case "in review":
         return <Activity className="h-4 w-4 animate-pulse" />;
       case "approved":
+      case "completed":
         return <CheckCircle className="h-4 w-4" />;
       case "rejected":
         return <XCircle className="h-4 w-4" />;
@@ -309,12 +282,14 @@ export default function ConsumerDashboard() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "pending":
-        return "secondary";
+      case "submitted":
       case "in_progress":
-        return "default";
+      case "in review":
+        return "secondary";
       case "approved":
+      case "completed":
         return "default";
       case "rejected":
         return "destructive";
@@ -337,12 +312,10 @@ export default function ConsumerDashboard() {
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case "in_progress":
-        return "In Progress";
-      default:
-        return status.charAt(0).toUpperCase() + status.slice(1);
-    }
+    const s = status?.toLowerCase() ?? "";
+    if (s === "in_progress" || s === "in review") return "In Progress";
+    if (s === "submitted" || s === "pending") return "Pending";
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   const getReliabilityColor = (reliability: number) => {
@@ -473,6 +446,39 @@ export default function ConsumerDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="institutions" className="space-y-6">
+          <div className="border-b border-gray-200 pb-2">
+            <TabsList className="bg-gray-100/80 p-1 rounded-xl border border-gray-200/60 inline-flex">
+              <TabsTrigger
+                value="institutions"
+                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Institutions</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="recent"
+                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+              >
+                <Clock className="w-4 h-4" />
+                <span>Recent Requests</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="approved"
+                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>Approved APIs</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="notifications"
+                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+              >
+                <Bell className="w-4 h-4" />
+                <span>Notifications</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
           <TabsContent value="institutions" className="space-y-6">
             <Card className="border-0 shadow-lg">
               <CardHeader>

@@ -72,7 +72,9 @@ export default function RequestsPage() {
   useEffect(() => {
     async function fetchRequests() {
       try {
-        const res = await fetch("http://localhost:5000/api/requests");
+        const res = await fetch("http://localhost:5000/api/requests", {
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Failed to fetch requests");
         const data = await res.json();
         setRequests(data);
@@ -81,33 +83,6 @@ export default function RequestsPage() {
       }
     }
     fetchRequests();
-  }, []);
-
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      setLoadingNotifications(true);
-      setError(null);
-      try {
-        const response = await fetch(
-          "http://localhost:5000/api/requests/:requestId/notifications"
-        ); // your API endpoint here
-        if (!response.ok) {
-          throw new Error("Failed to fetch notifications");
-        }
-        const data = await response.json();
-        setNotifications(data);
-      } catch (err: any) {
-        setError(err.message || "Unknown error");
-      } finally {
-        setLoadingNotifications(false);
-      }
-    };
-
-    fetchNotifications();
   }, []);
   const getStatusBadge = (status: any) => {
     switch (status) {
@@ -151,24 +126,6 @@ export default function RequestsPage() {
   // Add handler for request actions
   const handleRequestAction = async (action: string, request: any) => {
     setSelectedRequest(request);
-    if (action === "details") {
-      // fetch additional details from backend if needed
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/requests${request.id}`
-        );
-        if (!res.ok) throw new Error("Failed to load details");
-        const details = await res.json();
-        setSelectedRequest(details);
-      } catch (error) {
-        toast({
-          title: "Error loading details",
-          description: (error as Error).message,
-          variant: "destructive",
-        });
-        return;
-      }
-    }
     setOpenRequestDialog(
       action as "view" | "details" | "logs" | "report" | "conversation"
     );
@@ -314,7 +271,9 @@ export default function RequestsPage() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch("http://localhost:5000/api/requests");
+      const res = await fetch("http://localhost:5000/api/requests", {
+        credentials: "include",
+      });
       const data = await res.json();
       setRequests(data);
     } catch (error) {

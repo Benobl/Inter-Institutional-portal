@@ -35,6 +35,8 @@ type MyRequest = {
   user_id: number;
   decisionDate: string | null;
   reason: string | null;
+  purpose?: string;
+  requestedAttributes?: string[];
 };
 
 type HistoryItem = {
@@ -131,6 +133,7 @@ export default function IncomingRequestsPage() {
         `http://localhost:5000/api/requests/${requestId}/approve`,
         {
           method: "POST",
+          credentials: "include",
         }
       );
 
@@ -163,6 +166,7 @@ export default function IncomingRequestsPage() {
         `http://localhost:5000/api/requests/${requestId}/reject`,
         {
           method: "POST",
+          credentials: "include",
         }
       );
 
@@ -209,6 +213,7 @@ export default function IncomingRequestsPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ message: infoMessage }),
         }
       );
